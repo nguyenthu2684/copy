@@ -112,8 +112,7 @@ const routes = [
           },
           {
             path: "nPLConfig",
-            component: () =>
-              import("./views/app/config/system/NPLConfig.vue"),
+            component: () => import("./views/app/config/system/NPLConfig.vue"),
           },
         ],
       },
@@ -201,8 +200,7 @@ const routes = [
           //npl-dashboard
           {
             path: "npl-map",
-            component: () =>
-              import("./views/app/map/MapNPL.vue"),
+            component: () => import("./views/app/map/MapNPL.vue"),
           },
           {
             path: "npl-sale",
@@ -316,6 +314,17 @@ const routes = [
             path: "fire-location",
             component: () => import("./views/app/category/fire/FireLocation"),
           },
+          //NguyenThu-Color
+          {
+            path: "new-color",
+            name: "Colors",
+            component: () => import("./views/app/category/new-color/NewColor"),
+          },
+          {
+            path: "test",
+            name: "Colors",
+            component: () => import("./views/app/category/new-color/Test"),
+          },
           {
             path: "fire-station",
             component: () => import("./views/app/category/fire/FireStation"),
@@ -332,198 +341,234 @@ const routes = [
           // },
           {
             path: "bank",
-            name: 'Banks',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "Banks",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "contacttype",
-            name: 'ContactTypes',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "ContactTypes",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "customergroup",
-            name: 'NPLCustomerGroups',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "NPLCustomerGroups",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "containertype",
-            name: 'ContainerTypes',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "ContainerTypes",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "ordertype",
-            name: 'OrderTypes',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "OrderTypes",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "goodstype",
-            name: 'GoodsTypes',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "GoodsTypes",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "nplunit",
-            name: 'NPLUnits',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "NPLUnits",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "routegroup",
-            name: 'RouteGroups',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "RouteGroups",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "managementregion",
-            name: 'ManagementRegions',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "ManagementRegions",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "inspectionunit",
-            name: 'InspectionUnits',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "InspectionUnits",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "chargingstation",
-            name: 'ChargingStations',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "ChargingStations",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "port",
-            name: 'Ports',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "Ports",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "petrolstations",
-            name: 'PetrolStations',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "PetrolStations",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "nPLStation",
-            name: 'nPLStations',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "nPLStations",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "maintenancejob",
-            name: 'MaintenanceJobs',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "MaintenanceJobs",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "expert",
-            name: 'Experts',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "Experts",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "jobtype",
-            name: 'JobTypes',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "JobTypes",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "maintenancesupply",
-            name: 'MaintenanceSupplies',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "MaintenanceSupplies",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "chargejob",
-            name: 'ChargeJobs',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "ChargeJobs",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "extendunit",
-            name: 'ExtendUnits',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "ExtendUnits",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "costsincurred",
-            name: 'CostIncurreds',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "CostIncurreds",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "incident",
-            name: 'Incidents',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "Incidents",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "leavereason",
-            name: 'LeaveReasons',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "LeaveReasons",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "driverRequirement",
-            name: 'DriverRequirements',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "DriverRequirements",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "vehiclegroup",
-            name: 'VehicleGroups',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "VehicleGroups",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "vehicletype",
-            name: 'VehicleTypes',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "VehicleTypes",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "vehicleproducer",
-            name: 'VehicleProducers',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "VehicleProducers",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "vehicleColor",
-            name: 'VehicleColors',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "VehicleColors",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "vehicletire",
-            name: 'VehicleTires',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "VehicleTires",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "fuelkinds",
-            name: 'FuelKinds',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "FuelKinds",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "outsourcedvehicle",
-            name: 'OutsourcedVehicles',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "OutsourcedVehicles",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "outsourcedvehicleprovider",
-            name: 'OutsourcedVehicleProviders',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "OutsourcedVehicleProviders",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "vehicledevice",
-            name: 'VehicleDevices',
-            component: () => import("./views/app/category/npl/NPLCategories.vue"),
+            name: "VehicleDevices",
+            component: () =>
+              import("./views/app/category/npl/NPLCategories.vue"),
           },
           {
             path: "vehicle",
-            name: 'Vehicles',
+            name: "Vehicles",
             component: () => import("./views/app/category/npl/NPLVehicles.vue"),
           },
           {
             path: "SMRM",
-            name: 'SMRMs',
+            name: "SMRMs",
             component: () => import("./views/app/category/npl/NPLVehicles.vue"),
           },
           {
             path: "driver",
-            name: 'nPLDrivers',
+            name: "nPLDrivers",
             component: () => import("./views/app/category/npl/NPLDrivers.vue"),
           },
           {
             path: "drivehelper",
-            name: 'nPLDriveHelpers',
-            component: () => import("./views/app/category/npl/NPLDriverHelpers.vue"),
+            name: "nPLDriveHelpers",
+            component: () =>
+              import("./views/app/category/npl/NPLDriverHelpers.vue"),
           },
           {
             path: "customer",
-            name: 'nPLCustomers',
-            component: () => import("./views/app/category/npl/NPLCustomers.vue"),
+            name: "nPLCustomers",
+            component: () =>
+              import("./views/app/category/npl/NPLCustomers.vue"),
           },
           {
             path: "nplregion",
-            name: 'nPLRegions',
-            component: () => import("./views/app/category/npl/NewNPLRegions.vue"),
+            name: "nPLRegions",
+            component: () =>
+              import("./views/app/category/npl/NewNPLRegions.vue"),
           },
           // {
           //   path: "bank",
@@ -1032,12 +1077,16 @@ const routes = [
           {
             path: "yeu-cau-chot-dau-tai-xe",
             component: () =>
-              import("./views/app/function/npl/luong-tx/YeuCauChotDauTaiXe.vue"),
+              import(
+                "./views/app/function/npl/luong-tx/YeuCauChotDauTaiXe.vue"
+              ),
           },
           {
             path: "quan-ly-luong-tai-xe",
             component: () =>
-              import("./views/app/function/npl/luong-tx/DieuChinhLuongTaiXe.vue"),
+              import(
+                "./views/app/function/npl/luong-tx/DieuChinhLuongTaiXe.vue"
+              ),
           },
           {
             path: "sales-tracking",
@@ -1227,6 +1276,11 @@ const routes = [
             path: "schedule-options",
             component: () =>
               import("./views/app/function/light/ScheduleOptions.vue"),
+          },
+          {
+            path: "blue-pearl",
+            component: () =>
+              import("./views/app/function/light/BluePearlTest.vue"),
           },
           {
             path: "lighting-maintenance",
