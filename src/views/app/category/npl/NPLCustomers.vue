@@ -233,8 +233,15 @@ export default {
   // },
   data() {
     return {
-      notRequired: ["ID", "Note", "NameExtention1", "AddressExtention1", "ShortName", "Code"] //--> những fields không bắt buộc khi tạo mới hoặc edit
-    }
+      notRequired: [
+        "ID",
+        "Note",
+        "NameExtention1",
+        "AddressExtention1",
+        "ShortName",
+        "Code",
+      ], //--> những fields không bắt buộc khi tạo mới hoặc edit
+    };
   },
   ///phải format lại cái dataForm
   methods: {
@@ -277,7 +284,12 @@ export default {
               ...newObj,
               ID: ["ID", id, "ID", null],
               IsActive: [this.$t("status.status"), isActive, null, null],
-              ShortName: [newObj.ShortName[0], newObj.ShortName[1], newObj.ShortName[2], null]
+              ShortName: [
+                newObj.ShortName[0],
+                newObj.ShortName[1],
+                newObj.ShortName[2],
+                null,
+              ],
             };
 
             //lịch sử thao tác
@@ -455,7 +467,7 @@ export default {
       text-align: right;
     }
     .form-control[readonly] {
-      background: none,
+      background: none;
     }
     .form-control:disabled {
       background: #e9ecef;

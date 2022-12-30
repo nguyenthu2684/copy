@@ -1,5 +1,5 @@
 <template>
-  <div id="app-content-full" class="npl-categories">
+  <div id="app-content-full" class="npl-categories-colors">
     <b-card>
       <div ref="form-basic" class="h-100">
         <div ref="action-header">
@@ -23,34 +23,31 @@
         </div>
         <b-tabs v-model="currentTab" nav-class="d-none">
           <b-tab>
-            <div>
+            <div
+              class="box-content mt-2"
+              style="overflow: hidden; height: 62vh"
+            >
               <b-table
                 id="npl-table-basic-form"
                 class="npl-table-basic-form border-bottom text-center"
+                sticky-header
                 :items="dataTable"
                 :fields="fieldsTable"
+                bordered
+                responsive
                 show-empty
-                @row-selected="rowSelected"
-                ref="selectableTable"
+                head-variant="light"
                 selectable
                 :select-mode="'single'"
-                :per-page="perPage"
-                :current-page="currentPage"
-                @filtered="onFiltered"
-                :filter="filter"
-                :filter-included-fields="filterOn"
-                head-variant="light"
-                bordered="bordered"
-                style="max-height: calc(100% - 15px); margin-top: -1px"
                 @row-dblclicked="handleDbClick"
+                ref="selectableTable"
+                style="max-height: calc(100% - 15px); margin-top: -1px"
+                @row-selected="rowSelected"
               >
                 <template #empty>
                   <div class="text-center font-italic text-muted">
                     {{ $t("data.non-data") }}
                   </div>
-                </template>
-                <template #cell(ScheduleLists)>
-                  <span class="rounded-pill chiTiet">Xem chi tiết</span>
                 </template>
                 <template #cell(IsActive)="row">
                   <template v-if="row.item.IsActive === true">
@@ -79,7 +76,7 @@
                   </template>
                 </template>
               </b-table>
-              <b-pagination
+              <!-- <b-pagination
                 align="center"
                 :total-rows="dataTable.length"
                 :per-page="perPage"
@@ -98,7 +95,7 @@
                 <template v-slot:last-text>
                   <i class="simple-icon-control-end" />
                 </template>
-              </b-pagination>
+              </b-pagination> -->
             </div>
           </b-tab>
           <b-tab>
@@ -108,8 +105,26 @@
               :currentMode="currentMode"
             ></FormAddCom>
           </b-tab>
+          <b-tab>
+            <span class="title-category">QUẢN LÝ: DANH MỤC MÀU SẮC</span>
+            <HistoryActionColorBP
+              :dataTableHistory="dataTableHistory"
+              :fieldsTableHistory="fieldsTableHistory"
+            >
+            </HistoryActionColorBP>
+          </b-tab>
+          <b-tab>
+            <span class="title-category">QUẢN LÝ: DANH MỤC MÀU SẮC</span>
+            <TableListFileBP
+              v-if="dataAttachFile && dataAttachFile.length > 0"
+              :dataAttachFile="dataAttachFile"
+              :fieldsAttachFile="fieldsAttachFile"
+              @removeFile="removeAttachFile"
+              @editFile="editAttachFile"
+            />
+            <TableListFileBP v-else>{{ $t("cards.no-data") }} </TableListFileBP>
+          </b-tab>
         </b-tabs>
-        <p id="test"></p>
         <div ref="action-footer">
           <ActionsFooterNPL
             @clear-row="clearSelected"
@@ -121,6 +136,32 @@
             @change-tab="updateTab"
           />
         </div>
+        <ModalAttachBP
+          :show="showModalAttachFile"
+          :formEdit="formEditAttachFile"
+          @hidden="showModalAttachFile = false"
+          @submitData="handleAttachFile"
+        />
+        <ModalPrintBP
+          :dataPrint="dataPrint"
+          :show="showModalPrintFile"
+          @hidden="showModalPrintFile = false"
+          @formPrint="handlePrint"
+        />
+        <ModalImportExBP
+          :show="showModalExFile"
+          :dataNotify="dataNotifyImportExcel"
+          @hidden="showModalExFile = false"
+          @submitData="handleImportExcel"
+        />
+        <ModalSearchBP
+          :show="showModalSearch"
+          :methodSearch="methodSearch"
+          @hidden="showModalSearch = false"
+          @search="handleSearch"
+          @resetSearch="resetSearch"
+          :dataSearch="dataSearch"
+        />
       </div>
     </b-card>
   </div>
@@ -133,6 +174,12 @@ import ActionsFooterNPL from "@/views/app/category/npl/component/ActionsFooterNP
 import systemAPI from "@/api/modules/systemAPI";
 import colorAPI from "@/api/modules/colorAPI";
 import formCon from "./component/FormColorBP.vue";
+import HistoryActionColorBP from "./component/HistoryActionColorBP.vue";
+import TableListFileBP from "./component/TableListFileBP.vue";
+import ModalAttachBP from "./component/ModalAttractBP.vue";
+import ModalPrintBP from "./component/ModalPrintBP.vue";
+import ModalImportExBP from "./component/ModalImportExBP.vue";
+import ModalSearchBP from "./component/ModalSearchBP.vue";
 import { database } from "firebase";
 
 export default {
@@ -140,6 +187,12 @@ export default {
   components: {
     ActionsHeaderNPL,
     ActionsFooterNPL,
+    HistoryActionColorBP,
+    TableListFileBP,
+    ModalAttachBP,
+    ModalPrintBP,
+    ModalImportExBP,
+    ModalSearchBP,
     FormAddCom: formCon,
   },
   data() {
@@ -148,8 +201,73 @@ export default {
       perPage: 5,
       currentTab: 0,
       dataTable: [],
+      showModalExFile: false,
+      showModalSearch: false,
+      dataSearch: [],
+      methodSearch: [],
+      isSearching: false,
+      showModalPrintFile: false,
+      dataPrint: [],
+      showModalAttachFile: false,
+      formEditAttachFile: [],
+      dataAttachFile: [],
+      fieldsAttachFile: [
+        { key: "CreateDate", label: "Thời gian" },
+        { key: "UserFullName", label: "Người thực hiện" },
+        { key: "Name", label: "Tiêu đề" },
+        { key: "FileName", label: "", thClass: "d-none", tdClass: "d-none" },
+        { key: "LinkFile", label: "File đính kèm" },
+        { key: "Note", label: "Ghi chú" },
+        { key: "Action", label: "Thao tác" },
+      ],
+      dataTableHistory: [],
+      fieldsTableHistory: [
+        {
+          key: "ActionTypeID",
+          label: "Mã hành động",
+          thClass: "d-none",
+          tdClass: "d-none",
+        },
+        {
+          key: "CreateDate",
+          label: "Thời gian",
+          thClass: " text-left ",
+        },
+        {
+          key: "UserFullName",
+          label: "Người thực hiện",
+        },
+        {
+          key: "ActionTypeName",
+          label: "Thao tác",
+        },
+        {
+          key: "ErrDescription",
+          label: "Thông báo xử lý",
+          thClass: "d-none",
+          tdClass: "d-none",
+        },
+        {
+          key: "ID",
+          label: "ID",
+          thClass: "d-none",
+          tdClass: "d-none",
+        },
+        {
+          key: "Note ",
+          label: "Ghi chú",
+        },
+        {
+          key: "Valuerr",
+          label: "Giá trị",
+          thClass: "d-none",
+          tdClass: "d-none",
+        },
+      ],
       objectKey: null,
       colTypes: null,
+      objectKeyHistory: null,
+      colTypesHistory: null,
       keyString: "Colors",
       currentMode: "readOnly",
       objData: null,
@@ -164,6 +282,8 @@ export default {
         "AddressExtention1",
         "IsActive",
       ],
+      dataNotifyImportExcel: null,
+      // showModalNotifyImportExcel: false,
       isDisabledAdd: false,
       isDisabledEdit: false,
       isDisabledDelete: false,
@@ -175,29 +295,54 @@ export default {
       isDisabledSearch: false,
     };
   },
-  watch: {},
+  watch: {
+    // showModalNotifyImportExcel(newVal) {
+    //   if (!newVal) {
+    //     this.dataNotifyImportExcel = null;
+    //   }
+    // },
+  },
   async created() {
     await this.getData();
+    await this.getMethodSearch();
+    await this.getAttachFile(this.currentIndex);
     await this.getColTypes(this.keyString);
-    await this.getDynamicFormAdd(this.keyString);
     await this.getKeyTable();
+    await this.getDynamicFormAdd(this.keyString);
+    await this.getDataHistory(this.currentIndex);
   },
+
   computed: {
     totalPage() {
       return this.dataTable.length;
     },
 
+    //
+    FactorID() {
+      const path = this.$route.fullPath;
+      if (path.includes("category")) {
+        return "Category";
+      }
+      return "";
+    },
+
+    //
+    CategoryType() {
+      return this.keyString;
+    },
+
     //show data table
     fieldsTable() {
-      return handling.mergeTableAndData(this.objectKey, this.colTypes);
-      // if (this.dataTable && this.dataTable.length > 0) {
-      //   const keys = Object.keys(this.dataTable[0]);
-      //   let result = handling.mergeTableAndData(this.objectKey, this.colTypes);
-      //   return result;
-      // }
+      return handling.mergeKeyDynamic(this.objectKey, this.colTypes);
+    },
+    fieldsTableAndMethodSearch() {
+      return {
+        fieldsTable: this.fieldsTable,
+        methodSearch: this.methodSearch,
+      };
     },
   },
-  destroyed() {},
+
   methods: {
     //Double click view imformation data row
     handleDbClick(row) {
@@ -262,6 +407,14 @@ export default {
       if (this.currentMode == "adding" || this.currentMode == "editing") {
         return this.changeIndexWhenNotSave(index);
       }
+      if (this.currentTab === 2) {
+        this.currentIndex = index;
+        return this.getDataHistory(this.currentIndex);
+      }
+      if (this.currentTab === 3) {
+        this.currentIndex = index;
+        return this.getAttachFile(this.currentIndex);
+      }
       this.currentIndex = index;
       this.currentMode = "readOnly";
       const item = this.dataTable[index];
@@ -298,6 +451,33 @@ export default {
         });
     },
 
+    //
+    changeIndexWhenNotSaveTab(index) {
+      this.$bvModal
+        .msgBoxConfirm(this.$t("modal.question-skip") + "?", {
+          title: this.$t("form.warning").toUpperCase(),
+          size: "sm",
+          buttonSize: "sm",
+          okVariant: "danger",
+          okTitle: this.$t("modal.yes"),
+          cancelTitle: this.$t("modal.no"),
+          headerClass: "p-2 border-bottom-1",
+          footerClass: "p-2 border-top-1",
+          hideHeaderClose: false,
+          centered: true,
+        })
+        .then((value) => {
+          if (value) {
+            this.currentMode = "readOnly";
+            this.disableCancel();
+            this.currentTab = index;
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+
     // view form add data
     handleAdd() {
       if (this.columnAdd && this.columnAdd.length > 0) {
@@ -322,7 +502,6 @@ export default {
 
     //
     handleDelete(id) {
-      // console.log(this.dataTable[this.currentIndex].ColorID);
       const item = this.dataTable[this.currentIndex];
       this.getByID(item.ColorID);
       this.currentMode = "readOnly";
@@ -404,9 +583,6 @@ export default {
         ...obj,
       };
       /**assign currentMode */
-      // this.currentMode = "readOnly";
-
-      // console.log(body);
       /**if value id of form != null => call API edit */
       if (body.ID) {
         colorAPI
@@ -415,6 +591,7 @@ export default {
             if (val.status) {
               this.showNotify("success", this.$t("toast.message"), val.message);
               // this.getData();
+              this.disableSave();
               this.getDataAfterSave();
             } else {
               this.showNotify("error", this.$t("toast.message"), val.message);
@@ -430,6 +607,7 @@ export default {
           .then((val) => {
             if (val.status) {
               this.showNotify("success", this.$t("toast.message"), val.message);
+              this.disableSave();
               this.getDataAfterSave();
             } else {
               this.showNotify("error", this.$t("toast.message"), val.message);
@@ -452,37 +630,31 @@ export default {
 
     //Check value notNull
     checkIsValid(key) {
-      console.log("key", key);
       /**this.isCheckIsValid: false*/
       if (!this.isCheckIsValid) {
         return true;
       }
+
       /**notRequired: ["ID", "Note", "NameExtention1", "AddressExtention1"], */
       /**compare key with notRequired */
       if (this.notRequired.includes(key)) {
         return true;
       }
       const value = this.dataForm[key][1];
-      console.log("value", value);
       if (value || value === 0 || value === false) {
-        // isValid = true
-        // console.log(key);
         return true;
       } else {
-        // isValid = false
         return false;
       }
       // return isValid
     },
     checkFormValidate() {
       // let result = true;
-      console.log("form", this.dataForm);
       for (const key in this.dataForm) {
         let result = this.checkIsValid(key);
         this.dataForm[key][3] = result;
-        // console.log(result);
+
         if (!result) {
-          console.log("invaildKey:", key);
           break;
         }
       }
@@ -511,7 +683,6 @@ export default {
         });
     },
 
-    //
     getColTypes(string) {
       let body = {
         ObjectName: string,
@@ -524,7 +695,7 @@ export default {
         .catch((err) => {});
     },
 
-    //
+    ////getAll data table
     getData() {
       colorAPI
         .getListColor()
@@ -533,6 +704,35 @@ export default {
             ? handling.convertDataBitToBoolean(val.data)
             : [];
           this.currentIndex = this.dataTable.length - 1;
+        })
+        .catch((err) => console.log(err));
+    },
+
+    //getData History Color by id
+    getDataHistory(index) {
+      colorAPI
+        .getListColor()
+        .then((val) => {
+          this.dataTable = val.status
+            ? handling.convertDataBitToBoolean(val.data)
+            : [];
+          const item = this.dataTable[index];
+          let body = {
+            ID: item.ColorID,
+          };
+          /** */
+          colorAPI.getColorByID(body).then((val) => {
+            let obj = val.status ? val.data.Histories : [];
+            this.dataTableHistory = handling.convertDataBitToBoolean(obj);
+            const arr = [];
+            obj.forEach((item) => {
+              arr.push({
+                ...item,
+                CreateDate: handling.convertDateTime(item.CreateDate),
+              });
+            });
+            this.dataTableHistory = arr;
+          });
         })
         .catch((err) => console.log(err));
     },
@@ -579,7 +779,6 @@ export default {
             if (this.dataTable.length) {
               // this.currentIndex = this.dataTable.length - 1;
               const item = this.dataTable[this.currentIndex];
-              console.log(this.currentIndex);
               this.getByID(item.ColorID);
               this.currentMode = "readModel";
             } else {
@@ -589,7 +788,6 @@ export default {
             if (this.dataTable.length) {
               this.currentIndex = this.dataTable.length - 1;
               const item = this.dataTable[this.dataTable.length - 1];
-              console.log(this.currentIndex);
               this.getByID(item.ColorID);
             } else {
               this.currentTab = 0;
@@ -601,15 +799,332 @@ export default {
       // this.getData();
     },
 
-    //
-    // loadDocumentByIndex(index) {
-    //   this.currentMode = "readOnly";
-    //   this.currentIndex = index;
-    //   const item = this.dataTable[index];
-    //   this.getByID(item.ID);
-    //   this.getAttachFile(item.ID);
-    // },
+    ///ATTRACH FILE
+    //getData Attrach file Color by id
+    getAttachFile(index) {
+      colorAPI.getListColor().then((val) => {
+        this.dataTable = val.status
+          ? handling.convertDataBitToBoolean(val.data)
+          : [];
+        index = this.currentIndex;
+        const item = this.dataTable[index].ColorID;
+        let body = {
+          OID: item.toString(),
+          FactorID: this.FactorID,
+          EntryID: this.CategoryType,
+        };
+        colorAPI
+          .getAttachFile(body)
+          .then((val) => {
+            const arr = val.status ? val.data : [];
+            this.dataAttachFile = arr.map((item) => ({
+              ...item,
+              CreateDate: handling.convertDateTime(item.CreateDate),
+            }));
+          })
+          .catch((err) => console.log(err));
+      });
+    },
 
+    //
+    async handleAttachFile(obj) {
+      this.showModalAttachFile = false;
+      try {
+        const id = this.dataTable[this.currentIndex].ColorID;
+
+        const newObj = {
+          ...obj,
+          OID: id,
+          FactorID: this.FactorID,
+          EntryID: this.keyString,
+        };
+        let formData = new FormData();
+        for (const key in newObj) {
+          if (key === "File" && newObj[key] && newObj[key].length > 0) {
+            for (let i = 0; i < newObj[key].length; i++) {
+              formData.append("File", newObj[key][i]);
+            }
+          } else {
+            formData.append(key, newObj[key]);
+          }
+        }
+        let res;
+        if (obj.ID) {
+          res = await colorAPI.editAttachFile(formData);
+        } else {
+          res = await colorAPI.addAttachFile(formData);
+        }
+        if (res.status) {
+          this.getAttachFile(this.currentIndex);
+          this.showNotify("success", this.$t("toast.message"), res.message);
+        } else {
+          this.showNotify("error", this.$t("toast.message"), res.message);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    //
+    removeAttachFile(item) {
+      let body = {
+        ID: item.ID,
+      };
+      colorAPI
+        .deleteAttachFile(body)
+        .then((val) => {
+          if (val.status) {
+            this.showNotify("success", this.$t("toast.message"), val.message);
+            this.getAttachFile(this.currentIndex);
+          } else {
+            this.showNotify("error", this.$t("toast.message"), val.message);
+          }
+        })
+        .catch((err) => console.log(err));
+    },
+
+    //
+    editAttachFile(item) {
+      this.showModalAttachFile = true;
+      this.formEditAttachFile = { ...item };
+    },
+
+    /// PRINT
+    //get form modal print
+    getFormPrint() {
+      const body = {
+        FactorID: this.FactorID,
+        EntryID: this.CategoryType,
+      };
+      console.log("fac", this.FactorID);
+      console.log("entry", this.CategoryType);
+      colorAPI
+        .getFormPrint(body)
+        .then((val) => {
+          console.log("val", val);
+          this.dataPrint = val.status ? val.data : [];
+          this.showModalPrintFile = true;
+        })
+        .catch((err) => console.log(err));
+    },
+
+    //Button Print
+    handlePrint(obj) {
+      switch (obj.PrintType.toUpperCase()) {
+        case "DOWNLOAD":
+          /**gan the a cho thanh phan */
+          const link = document.createElement("a");
+          console.log("link", link);
+          /**get name file */
+          link.download = obj.FormPrintName;
+          /**get link file */
+          link.href = obj.PrintAction;
+          document.body.appendChild(link);
+          console.log("app", document.body.appendChild(link));
+          link.click();
+          document.body.removeChild(link);
+          break;
+        case "CLIENT":
+          let formName = "Phân loại màu lá/hoa";
+          handling.printExcel(
+            "npl-table-basic-form",
+            formName.toUpperCase(),
+            null,
+            null
+            // this.$t("form.page") + " " + this.currentPage
+          );
+        case "SERVER":
+        default:
+          break;
+      }
+      if (obj.PrintType.toUpperCase() === "DOWNLOAD") {
+        const link = document.createElement("a");
+        link.download = obj.FormPrintName;
+        link.href = obj.PrintAction;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      this.showModalPrintFile = false;
+    },
+
+    /// IMPORT
+    //
+    handleImportExcel(file) {
+      console.log(file);
+      let formData = new FormData();
+      formData.append("FactorID", this.FactorID);
+      formData.append("EntryID", this.CategoryType);
+      formData.append("File", file);
+      colorAPI
+        .importExcel(formData)
+        .then((val) => {
+          if (val.status) {
+            console.log("valI", val);
+            // this.showNotify("success", this.$t("toast.message"), val.message);
+            this.dataNotifyImportExcel = val.data;
+            // this.showModalNotifyImportExcel = true;
+            this.currentTab = 0;
+            this.getData();
+          } else {
+            this.showNotify("error", this.$t("toast.message"), val.message);
+          }
+          this.showModalExFile = false;
+        })
+        .catch((err) => console.log(err));
+    },
+
+    ///SEARCH
+    //
+
+    getDataAndLastDocument() {
+      colorAPI
+        .getListColor()
+        .then((val) => {
+          this.dataTable = val.status
+            ? handling.convertDataBitToBoolean(val.data)
+            : [];
+          if (this.dataTable.length) {
+            this.loadDocumentByIndex(this.dataTable.length - 1);
+          }
+        })
+        .catch((err) => console.log(err));
+    },
+
+    loadDocumentByIndex(index) {
+      this.currentMode = "readOnly";
+      this.currentIndex = index;
+      const item = this.dataTable[index];
+      this.getByID(item.ColorID);
+    },
+
+    handleSearch(arr) {
+      this.dataSearchCurrent = [...arr];
+      console.log("dataS", arr);
+      this.isSearching = true;
+      const ListSearch = [];
+      arr.forEach((item) => {
+        if (item.Operator) {
+          if (item.Param1 || item.Param1 === 0) {
+            ListSearch.push({
+              Name: item.Name,
+              Operator: item.Operator,
+              Param1: item.Param1.toString(),
+              Param2: item.Param2 ? item.Param2.toString() : "",
+            });
+          }
+        }
+      });
+      // console.log(ListSearch);
+      if (ListSearch.length) {
+        this.currentTab = 0;
+        const body = {
+          ListSearch,
+          FactorID: this.FactorID,
+          EntryID: this.CategoryType,
+        };
+        colorAPI
+          .search(body)
+          .then((val) => {
+            this.currentPage = 1;
+            this.dataTable = val.status ? val.data : [];
+            if (this.dataTable.length) {
+              this.loadDocumentByIndex(this.dataTable.length - 1);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      } else {
+        this.getDataAndLastDocument();
+      }
+    },
+    resetSearch() {
+      this.isSearching = false;
+      this.setDataSearch(this.fieldsTable);
+    },
+
+    //
+    //SEARCH
+    setDataSearch(arr) {
+      console.log("arrSet", arr);
+      const newArr = [];
+      arr.forEach((item) => {
+        console.log("arrSearch", item);
+        const obj = {
+          Label: item.label,
+          Name: item.key,
+          Type: item.typeCol,
+          Operator: "like",
+          OperatorDescription: "Có",
+          SearchOption: this.getSearchOptionByType(
+            item.typeCol,
+            this.methodSearch
+          ),
+          Param1: null,
+          Param2: null,
+        };
+        console.log("arrobj", obj);
+        console.log("method", this.methodSearch);
+        if (item.key.toUpperCase() === "ISACTIVE") {
+          obj.Operator = "=";
+          (obj.OperatorDescription = "Bằng"),
+            (obj.SearchOption = [
+              { text: this.$t("npl.using"), value: 1 },
+              { text: this.$t("npl.not-use"), value: 0 },
+            ]);
+        } else if (item.typeCol.toUpperCase() === "DATE") {
+          obj.Operator = "=";
+          obj.OperatorDescription = "Bằng";
+        }
+        newArr.push(obj);
+      });
+      this.dataSearch = newArr;
+    },
+
+    getMethodSearch() {
+      colorAPI
+        .getMethodSearch()
+        .then((val) => {
+          console.log("valMethod", val);
+          let data = val.status ? val.data : [];
+          if (data.length > 0) {
+            const arr = [];
+            data.forEach((item) => {
+              if (item.Valu) {
+                console.log("valMethod", item);
+                arr.push({
+                  text: item.Shw,
+                  value: item.Valu,
+                });
+              }
+            });
+            this.methodSearch = [...arr];
+            console.log("method", this.methodSearch);
+          }
+        })
+        .catch((err) => console.log(err));
+    },
+
+    getSearchOptionByType(type, arr) {
+      let option = [...arr];
+      console.log("op", arr);
+      if (type.toUpperCase() === "STRING" || type.toUpperCase() === "NOTE") {
+        option = arr.filter(
+          (item) =>
+            item.value === "=" ||
+            item.value === "like" ||
+            item.value === "not like"
+        );
+      } else if (type.toUpperCase() === "DATE") {
+        option = arr.filter(
+          (item) => item.value !== "like" && item.value !== "not like"
+        );
+      }
+      return option;
+    },
+
+    ///
     //
     clearSelected() {
       this.$refs.selectableTable.clearSelected();
@@ -645,8 +1160,30 @@ export default {
           this.handleEdit();
           break;
         case "save":
-          this.disableSave();
+          // this.disableSave();
           this.handleSave();
+          break;
+        case "attachFile":
+          this.currentTab = 3;
+          this.showModalAttachFile = true;
+          this.currentMode = "readOnly";
+          break;
+        case "print":
+          this.getFormPrint();
+          this.showModalPrintFile = true;
+          this.currentMode = "readOnly";
+          break;
+        case "importExcel":
+          this.showModalExFile = true;
+          this.currentMode = "readOnly";
+          break;
+        case "find":
+          this.showModalSearch = true;
+          this.currentMode = "readOnly";
+          if (!this.isSearching) {
+            // this.dataSearch = [...this.dataSearchCurrent]
+            this.setDataSearch(this.fieldsTable);
+          }
           break;
         default:
           this.currentTab = 0;
@@ -655,22 +1192,44 @@ export default {
       }
     },
 
-    //
+    //Change tab
     updateTab(value) {
       switch (value) {
         case 0:
+          if (this.currentMode == "adding" || this.currentMode == "editing") {
+            return this.changeIndexWhenNotSaveTab(0);
+          }
           this.currentTab = 0;
-          // this.currentIndex = this.dataTable.length - 1;
           break;
         case 1:
           this.currentTab = 1;
           this.currentMode = "readOnly";
           this.handleEdit();
           break;
+        case 2:
+          if (this.currentMode == "adding" || this.currentMode == "editing") {
+            return this.changeIndexWhenNotSaveTab(2);
+          }
+          this.currentTab = 2;
+          this.currentMode = "readOnly";
+          this.getDataHistory(this.currentIndex);
+          break;
+        case 3:
+          if (this.currentMode == "adding" || this.currentMode == "editing") {
+            return this.changeIndexWhenNotSaveTab(3);
+          }
+          this.currentTab = 3;
+          this.currentMode = "readOnly";
+          break;
         default:
           break;
       }
     },
+
+    //
+    // hiddenModalNotifyImportExcel() {
+    //   this.showModalNotifyImportExcel = false;
+    // },
 
     //show notifi after handle button
     showNotify(type, titleMessage, message) {
@@ -774,5 +1333,8 @@ export default {
   text-transform: uppercase;
   color: #005aab;
   margin-bottom: 20px;
+}
+.box-content {
+  overflow: auto;
 }
 </style>

@@ -754,7 +754,9 @@ const routes = [
           //tree
           {
             path: "tree-color",
-            component: () => import("./views/app/category/tree/Color"),
+            name: "Colors",
+            component: () => import("./views/app/category/new-color/Test"),
+            // component: () => import("./views/app/category/tree/Color"),
           },
           {
             path: "tree-land",
